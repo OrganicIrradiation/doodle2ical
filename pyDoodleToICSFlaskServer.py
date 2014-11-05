@@ -1,13 +1,4 @@
-from datetime import datetime, date
 from flask import Flask
-from icalendar import Calendar, Event
-import json
-import pytz
-import re
-import string
-import urllib2
-import uuid
-
 import pyDoodleToICS
 
 app = Flask(__name__)
@@ -29,4 +20,4 @@ def page_not_found(e):
     return 'Sorry, nothing at this URL.', 404
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port = 8080)
