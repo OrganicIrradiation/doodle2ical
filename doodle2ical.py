@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Filename: doodle2ics.py
+# Filename: doodle2ical.py
 
 from datetime import datetime
 from flask import Flask
@@ -16,7 +16,7 @@ app = Flask(__name__)
 class DoodleNotFound(Exception):
     pass
 
-def doodle2ics(doodleid):
+def doodle2ical(doodleid):
     try:
         doodleid = re.findall(r'http.*?doodle\.com\/(.*?)\/', doodleid)[0]
     except IndexError:
@@ -35,7 +35,7 @@ def doodle2ics(doodleid):
     poll_desc = poll_desc.replace('<br/>', ' -- ')
 
     cal = Calendar()
-    cal.add('prodid', '-//doodle2ics//EN')
+    cal.add('prodid', '-//doodle2ical//EN')
     cal.add('version', '2.0')
     cal.add('x-wr-calname', 'Doodle: {0}'.format(poll_data['title']))
     cal.add('x-wr-caldesc', poll_desc)
@@ -64,7 +64,7 @@ def doodle2ics(doodleid):
 @app.route('/<doodleid>.ical')
 def process_doodle(doodleid):
     try:
-        outfile = doodle2ics(doodleid)
+        outfile = doodle2ical(doodleid)
         return outfile
     except DoodleNotFound:
         return 'Doodle ID #'+doodleid+' not found.', 404
