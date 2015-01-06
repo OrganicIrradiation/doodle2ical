@@ -1,7 +1,7 @@
-pyDoodleToICS.py
+doodle2ics
 ==========================
 
-Script that takes a Doodle.com administration page and converts the entries into an iCal file.  It assumes the following Doodle settings:
+Module that takes a Doodle.com administration page and converts the entries into an iCal file.  It assumes the following Doodle settings:
 
   * **Hidden poll** Confidential participation: Only you can see the answers.
   * **Participant can only choose one option** By default all options are selectable. This setting limits the choice to one option per participant.
