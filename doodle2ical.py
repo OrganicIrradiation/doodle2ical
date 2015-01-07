@@ -17,7 +17,9 @@ app = Flask(__name__)
 class DoodleNotFound(Exception):
     pass
 
-def doodle2ical(doodleid):
+def doodle2ical(doodleid, doodletz):
+    timezone = pytz.timezone(doodletz)
+
     try:
         doodleid = re.findall(r'http.*?doodle\.com\/(.*?)\/', doodleid)[0]
     except IndexError:
@@ -31,8 +33,6 @@ def doodle2ical(doodleid):
             raise DoodleNotFound()
 
     data = page.read()
-    timezone = pytz.timezone(re.findall(r';timeZone=(.*?)"', data)[0].replace('%2F','/'))
-    utc = pytz.timezone('UTC')
     poll_data = json.loads(re.findall(r"data.poll\s*=\s*(.*);", data)[0])
     poll_desc = HTMLParser.HTMLParser().unescape(poll_data['descriptionHTML'])
     poll_desc = poll_desc.replace('<br/>', ' -- ')
@@ -47,8 +47,8 @@ def doodle2ical(doodleid):
             time_id = string.find(entry[u'preferences'], u'y')
             time_start = [v for v in poll_data['fcOptions'] if v[u'id'] == time_id][0][u'start']
             time_end = [v for v in poll_data['fcOptions'] if v[u'id'] == time_id][0][u'end']
-            time_start = timezone.localize(datetime.utcfromtimestamp(time_start)).astimezone(utc)
-            time_end = timezone.localize(datetime.utcfromtimestamp(time_end)).astimezone(utc)
+            time_start = timezone.localize(datetime.utcfromtimestamp(time_start))
+            time_end = timezone.localize(datetime.utcfromtimestamp(time_end))
 
             event = Event()
             event.add('summary', entry[u'name'])
@@ -64,10 +64,12 @@ def doodle2ical(doodleid):
 
     return cal.to_ical()
 
-@app.route('/<doodleid>.ical')
-def process_doodle(doodleid):
+@app.route('/<contintent>/<city>/<doodleid>.ical')
+def process_doodle(contintent, city, doodleid):
+    # Make sure URL is formatted: server/<contintent>/<city>/<doodlid>.ical
     try:
-        data = doodle2ical(doodleid)
+        doodletz = '{0}/{1}'.format(contintent, city)
+        data = doodle2ical(doodleid, doodletz)
         outfile = app.make_response(data)
         outfile.mimetype = 'text/calendar'
         return outfile
