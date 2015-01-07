@@ -6,6 +6,7 @@ from flask import Flask
 import HTMLParser
 from icalendar import Calendar, Event
 import json
+import pytz
 import re
 import string
 import urllib2
@@ -30,6 +31,7 @@ def doodle2ical(doodleid):
             raise DoodleNotFound()
 
     data = page.read()
+    timezone = pytz.timezone(re.findall(r'timeZone: "(.*?)"', data)[0])
     poll_data = json.loads(re.findall(r"data.poll\s*=\s*(.*);", data)[0])
     poll_desc = HTMLParser.HTMLParser().unescape(poll_data['descriptionHTML'])
     poll_desc = poll_desc.replace('<br/>', ' -- ')
@@ -44,8 +46,8 @@ def doodle2ical(doodleid):
             time_id = string.find(entry[u'preferences'], u'y')
             time_start = [v for v in poll_data['fcOptions'] if v[u'id'] == time_id][0][u'start']
             time_end = [v for v in poll_data['fcOptions'] if v[u'id'] == time_id][0][u'end']
-            time_start = datetime.utcfromtimestamp(time_start)
-            time_end = datetime.utcfromtimestamp(time_end)
+            time_start = timezone.localize(datetime.utcfromtimestamp(time_start))
+            time_end = timezone.localize(datetime.utcfromtimestamp(time_end))
 
             event = Event()
             event.add('summary', entry[u'name'])
@@ -64,7 +66,9 @@ def doodle2ical(doodleid):
 @app.route('/<doodleid>.ical')
 def process_doodle(doodleid):
     try:
-        outfile = doodle2ical(doodleid)
+        data = doodle2ical(doodleid)
+        outfile = app.make_response(data)
+        outfile.mimetype = 'text/calendar'
         return outfile
     except DoodleNotFound:
         return 'Doodle ID #'+doodleid+' not found.', 404
@@ -73,3 +77,6 @@ def process_doodle(doodleid):
 def page_not_found(error):
     """Return a custom 404 error."""
     return 'Sorry, nothing at this URL.', 404
+
+if __name__ == "__main__":
+    app.run()
