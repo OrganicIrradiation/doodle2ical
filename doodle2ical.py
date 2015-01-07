@@ -31,7 +31,7 @@ def doodle2ical(doodleid):
             raise DoodleNotFound()
 
     data = page.read()
-    timezone = pytz.timezone(re.findall(r'timeZone: "(.*?)"', data)[0])
+    timezone = pytz.timezone(re.findall(r'"timeZone":"(.*?)"', data)[0])
     poll_data = json.loads(re.findall(r"data.poll\s*=\s*(.*);", data)[0])
     poll_desc = HTMLParser.HTMLParser().unescape(poll_data['descriptionHTML'])
     poll_desc = poll_desc.replace('<br/>', ' -- ')
