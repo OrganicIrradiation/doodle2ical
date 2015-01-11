@@ -11,10 +11,10 @@ While the administration link would be something like:
 
     https://www.doodle.com/saiou2ofo2nf2e1rfjgsdgj1/admin#admin
 
-In this case, the "ID" used by doodle2ical is the longer ID from the administration link: `saiou2ofo2nf2e1rfjgsdgj1` (note: this is a fake administration link). Using this administration link, you can use doodle2ical to generate an .ical file.  I have the current code running on a Heroku instance, so you are welcome to try your ID(s); however, I would recommend you run your own instances to avoid any security concerns:
+In this case, the "ID" used by doodle2ical is the longer ID from the administration link: `saiou2ofo2nf2e1rfjgsdgj1` (note: this is a fake administration link). Using this administration link and the calendar's "base" timezone, you can use doodle2ical to generate an .ical file.  I have the current code running on a Heroku instance, so you are welcome to try your ID(s); however, I would recommend you run your own instances to avoid any security concerns:
 
-    http://doodle2ical.herokuapp.com/<doodleid_here>.ical
-    http://doodle2ical.herokuapp.com/saiou2ofo2nf2e1rfjgsdgj1.ical
+    http://doodle2ical.herokuapp.com/<timezonecontinent>/<timezonecity>/<doodleid_here>.ical
+    http://doodle2ical.herokuapp.com/Europe/Berlin/saiou2ofo2nf2e1rfjgsdgj1.ical
 
 doodle2ical currently assumes the following Doodle settings:
 
@@ -48,7 +48,7 @@ You should get some feedback, for example:
 
 Then you can simply use your web browser or local calendar application to verify that the calendar file is correctly generated:
 
-    http://localhost:5000/<doodleid_here>.ical
+    http://localhost:5000/<timezonecontinent>/<timezonecity>/<doodleid_here>.ical
 
 ## Installation on Heroku
 
