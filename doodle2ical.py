@@ -66,7 +66,7 @@ def doodle2ical(doodleid, doodletz):
 
 @app.route('/<contintent>/<city>/<doodleid>.ical')
 def process_doodle(contintent, city, doodleid):
-    # Make sure URL is formatted: server/<contintent>/<city>/<doodlid>.ical
+    """Make sure URL is formatted: server/<contintent>/<city>/<doodlid>.ical"""
     try:
         doodletz = '{0}/{1}'.format(contintent, city)
         data = doodle2ical(doodleid, doodletz)
@@ -75,6 +75,11 @@ def process_doodle(contintent, city, doodleid):
         return outfile
     except DoodleNotFound:
         return 'Doodle ID #'+doodleid+' not found.', 404
+
+@app.route('/')
+def front_page():
+	"""Return an empty front page"""
+	return '', 204
 
 @app.errorhandler(404)
 def page_not_found(error):
