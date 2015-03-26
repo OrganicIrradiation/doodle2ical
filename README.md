@@ -61,6 +61,10 @@ If everything seems ok, then you can create a heroku app:
     heroku login
     heroku create
 
+Feel free to rename the app (you'll want to change the app name):
+
+    heroku apps:rename doodle2ical
+
 And deploy it to your Heroku instance using:
 
     git push heroku master
