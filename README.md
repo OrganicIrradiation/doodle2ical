@@ -32,7 +32,7 @@ Here are some quick instructions to try it out on your own computer. I am doing 
 Once you have these, clone the repository into a local folder and install the prerequisites (preferably using a virtualenv):
 
     git clone https://github.com/OrganicIrradiation/doodle2ical.git
-    pip install flask gunicorn icalendar
+    pip install flask gunicorn icalendar arrow
 
 Try it out on your local machine by loading the Procfile using foreman:
 

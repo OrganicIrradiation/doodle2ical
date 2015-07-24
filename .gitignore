@@ -1,2 +1,5 @@
 venv
 *.pyc
+
+# Setup notes
+setup_notes.md

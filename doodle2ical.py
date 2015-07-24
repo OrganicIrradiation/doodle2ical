@@ -1,12 +1,11 @@
 #!/usr/bin/python
 # Filename: doodle2ical.py
 
-from datetime import datetime
 from flask import Flask
 import HTMLParser
 from icalendar import Calendar, Event
+import arrow
 import json
-import pytz
 import re
 import string
 import urllib2
@@ -17,9 +16,7 @@ app = Flask(__name__)
 class DoodleNotFound(Exception):
     pass
 
-def doodle2ical(doodleid, doodletz):
-    timezone = pytz.timezone(doodletz)
-
+def get_poll_data(doodleid):
     try:
         doodleid = re.findall(r'http.*?doodle\.com\/(.*?)\/', doodleid)[0]
     except IndexError:
@@ -28,13 +25,16 @@ def doodle2ical(doodleid, doodletz):
 
     try:
         page = urllib2.urlopen(url)
-    except urllib2.HTTPError, error:
+    except urllib2.HTTPError as error:
         if error.code == 404:
             raise DoodleNotFound()
 
     data = page.read()
     poll_data = json.loads(re.findall(r"doodleJS\.data\,\ (.*)\);\n", data)[0])
-    poll_data = poll_data['poll']
+    return poll_data['poll']
+
+def doodle2ical(doodleid, doodletz):
+    poll_data = get_poll_data(doodleid)
     poll_desc = HTMLParser.HTMLParser().unescape(poll_data['descriptionHTML'])
     poll_desc = poll_desc.replace('<br/>', ' -- ')
 
@@ -48,14 +48,20 @@ def doodle2ical(doodleid, doodletz):
             time_id = string.find(entry[u'preferences'], u'y')
             time_start = [v for v in poll_data['fcOptions'] if v[u'id'] == time_id][0][u'start']
             time_end = [v for v in poll_data['fcOptions'] if v[u'id'] == time_id][0][u'end']
-            time_start = timezone.localize(datetime.utcfromtimestamp(time_start))
-            time_end = timezone.localize(datetime.utcfromtimestamp(time_end))
+            time_start = arrow.get(time_start)
+            time_end = arrow.get(time_end)
+            # Add time zone
+            time_start = arrow.get(time_start.datetime, doodletz)
+            time_end = arrow.get(time_end.datetime, doodletz)
+            # Need to shift time 12 hours:
+            time_start = time_start.replace(hours=-12)
+            time_end = time_end.replace(hours=-12)
 
             event = Event()
             event.add('summary', entry[u'name'])
-            event.add('dtstamp', datetime.now())
-            event.add('dtstart', time_start)
-            event.add('dtend', time_end)
+            event.add('dtstamp', arrow.now().datetime)
+            event.add('dtstart', time_start.datetime)
+            event.add('dtend', time_end.datetime)
             event.add('uid', str(uuid.uuid4()))
 
             cal.add_component(event)
@@ -88,4 +94,4 @@ def page_not_found(error):
     return 'Sorry, nothing at this URL.', 404
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
