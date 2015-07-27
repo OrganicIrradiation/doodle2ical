@@ -43,6 +43,7 @@ def doodle2ical(doodleid, doodletz):
     cal.add('version', '2.0')
     cal.add('x-wr-calname', 'Doodle: {0}'.format(poll_data['title']))
     cal.add('x-wr-caldesc', poll_desc)
+    cal.add('x-wr-timezone', doodletz)
     for entry in poll_data['participants']:
         try:
             time_id = string.find(entry[u'preferences'], u'y')
