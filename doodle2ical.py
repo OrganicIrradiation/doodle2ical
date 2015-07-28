@@ -2,10 +2,11 @@
 # Filename: doodle2ical.py
 
 from flask import Flask
-import HTMLParser
-from icalendar import Calendar, Event
 import arrow
+import HTMLParser
+import icalendar
 import json
+import pytz
 import re
 import string
 import urllib2
@@ -34,13 +35,17 @@ def get_poll_data(doodleid):
     return poll_data['poll']
 
 def doodle2ical(doodleid, doodletz):
+    tz = pytz.timezone(doodletz)
     poll_data = get_poll_data(doodleid)
     poll_desc = HTMLParser.HTMLParser().unescape(poll_data['descriptionHTML'])
     poll_desc = poll_desc.replace('<br/>', ' -- ')
 
-    cal = Calendar()
+    cal = icalendar.Calendar()
     cal.add('prodid', '-//doodle2ical//EN')
     cal.add('version', '2.0')
+    # timezone = icalendar.cal.Timezone()
+    # timezone.add('TZID', doodletz)
+    # cal.add_component(timezone)
     cal.add('x-wr-calname', 'Doodle: {0}'.format(poll_data['title']))
     cal.add('x-wr-caldesc', poll_desc)
     cal.add('x-wr-timezone', doodletz)
@@ -52,13 +57,13 @@ def doodle2ical(doodleid, doodletz):
             time_start = arrow.get(time_start)
             time_end = arrow.get(time_end)
             # Add time zone
-            time_start = arrow.get(time_start.datetime, doodletz)
-            time_end = arrow.get(time_end.datetime, doodletz)
+            time_start.tzinfo = tz
+            time_end.tzinfo = tz
             # Need to shift time 12 hours:
             time_start = time_start.replace(hours=-12)
             time_end = time_end.replace(hours=-12)
 
-            event = Event()
+            event = icalendar.Event()
             event.add('summary', entry[u'name'])
             event.add('dtstamp', arrow.now().datetime)
             event.add('dtstart', time_start.datetime)
